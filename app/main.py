@@ -4,13 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 import logging
 from app.config import settings
 from app.errors import ApiError
 from app.security import limiter
-from app.routers import auth, batches, assignments, riders
+from app.routers import auth, batches, assignments, riders, internal
 
 
 def create_app():
@@ -27,7 +28,7 @@ def create_app():
 
     @app.exception_handler(ApiError)
     async def api_error(request, exc):
-        return JSONResponse(status_code=exc.status, content={"code": exc.code, "message": exc.message, **exc.details})
+        return JSONResponse(status_code=exc.status, content=jsonable_encoder({"code": exc.code, "message": exc.message, **exc.details}))
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
@@ -46,6 +47,7 @@ def create_app():
     app.include_router(batches.router, prefix="/api")
     app.include_router(assignments.router, prefix="/api")
     app.include_router(riders.router, prefix="/api")
+    app.include_router(internal.router, prefix="/api")
     app.mount("/", StaticFiles(directory=Path(__file__).resolve().parents[1] / "public", html=True), name="ui")
     return app
 

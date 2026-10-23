@@ -49,5 +49,7 @@ def status(ident: int, body: Online, user=Depends(allowed), db=Depends(write_db)
     else:
         r.status = "OFFLINE"
     db.flush()
+    from app.engine.sweeper import run_sweep
+    run_sweep(db, now)
     db.commit()
     return record(r)

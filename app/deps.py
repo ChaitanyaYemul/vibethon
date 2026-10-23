@@ -47,9 +47,14 @@ def own(db, model, ident, user):
 
 
 def read_db(db=Depends(get_db)):
+    from app.engine.sweeper import maybe_sweep
+    if maybe_sweep(db):
+        db.commit()
     return db
 
 
 def write_db(db=Depends(get_db)):
     engine_lock(db)
+    from app.engine.sweeper import maybe_sweep
+    maybe_sweep(db)
     return db
