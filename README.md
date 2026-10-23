@@ -112,6 +112,7 @@ Event payloads contain IDs, quantities, states, categories, timing values, and r
 
 ```powershell
 .venv\Scripts\python -m pytest -q
+node tests/test_refresh.cjs
 .venv\Scripts\python -m scripts.smoke
 ```
 
@@ -119,7 +120,7 @@ Tests use real PostgreSQL through `TEST_DATABASE_URL`. The test database name mu
 
 The 31 checks cover the required judge scenarios, quantity conservation, concurrent dispatch, unique rider reservations, lifecycle guards, pickup/delivery expiry, compatibility, ownership/RBAC, rate limits, validation, idempotency, demo route exclusion, time travel, and the full judge API walkthrough. They use explicit engine timestamps without sleeps.
 
-The smoke command checks the running local HTTP server, login, authentication, and admin overview. It does not seed or create batches. Browser visual verification remains pending: the browser permission gate denied access to the local origin during this build. Supabase WebSocket delivery and hosted behavior also require a configured deployment to verify.
+The optional Node.js regression check verifies that refreshes keep the rider card visible while waiting for the API and preserve it on network failures. The smoke command checks the running local HTTP server, login, authentication, and admin overview. It does not seed or create batches. Browser visual verification remains pending: the browser permission gate denied access to the local origin during this build. Supabase WebSocket delivery and hosted behavior also require a configured deployment to verify.
 
 ## Supabase + Vercel deployment
 
@@ -128,7 +129,7 @@ The smoke command checks the running local HTTP server, login, authentication, a
 3. Deploy this repository to Vercel. `api/index.py` exports the FastAPI app; `public/index.html` is served statically. `vercel.json` routes `/api/*` to Python and schedules `/api/internal/sweep` every minute.
 4. Configure `DATABASE_URL`, random `JWT_SECRET`, `JWT_EXP_MINUTES`, random `CRON_SECRET`, `ALLOWED_ORIGINS` set to your deployed origin, `DEMO_MODE`, `DEMO_PASSWORD`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` in Vercel.
 5. Seed the initialized database using `python -m scripts.seed` with the intended deployment environment. Sign in, click Seed if needed, and run the walkthrough. Initial seeding is required before any admin can sign in.
-6. Vercel Cron sends `Authorization: Bearer $CRON_SECRET`. If the plan rejects minute-frequency cron, adjust its schedule; request-driven sweeps remain available.
+6. Vercel Cron sends `Authorization: Bearer $CRON_SECRET`. The committed minute-frequency schedule requires a plan that supports it. Vercel Hobby permits cron only once per day: before deploying on Hobby, change the schedule in `vercel.json` to `0 0 * * *` (daily), or remove the cron entry. Request-driven sweeps remain available while users interact with the app. See [Vercel cron limits](https://vercel.com/docs/cron-jobs/usage-and-pricing).
 7. Set `DEMO_MODE=false` outside judging and restart/redeploy. All `/api/demo/*` routes then return 404. Use non-demo accounts and strong credentials for real use.
 
 No hosted deployment was created during the build. Supabase/Vercel project credentials were not configured. The committed files and instructions are ready for deployment configuration.
