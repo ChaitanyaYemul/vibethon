@@ -1,4 +1,3 @@
 {
-  "rewrites": [{"source": "/api/(.*)", "destination": "/api/index.py"}],
   "crons": [{"path": "/api/internal/sweep", "schedule": "0 0 * * *"}]
 }
