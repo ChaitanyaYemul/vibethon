@@ -1,3 +1,4 @@
 {
+  "regions": ["bom1"],
   "crons": [{"path": "/api/internal/sweep", "schedule": "0 0 * * *"}]
 }
