@@ -102,6 +102,8 @@ The tight CSV has no medical-demand row. Its feasibility gate also evaluates the
 
 Configure `SUPABASE_URL` and `SUPABASE_ANON_KEY` to enable browser Realtime. The dashboard subscribes to inserts into `events`, debounces refreshes by 300 ms, and retains polling every two seconds plus a five-second panel refresh. With no Supabase configuration, polling alone works.
 
+The dispatch map uses OpenStreetMap's canonical tile endpoint. Tile images explicitly use `strict-origin-when-cross-origin`, so OpenStreetMap receives the site origin required by its usage policy. The app-wide `no-referrer` header remains in place for other resources. Do not remove the tile-specific policy: doing so can produce “403 Access blocked” map tiles.
+
 JWTs use HS256 and real-time expiry; passwords use bcrypt directly. Requests enforce role and ownership checks, and ownership mismatches return 404. Input schemas forbid extra fields and enforce the specified ranges. Batch create/dispatch accept `Idempotency-Key` and persist the response in the same transaction. Cron authenticates using a constant-time comparison of its bearer secret. Slowapi limits auth to 10 requests/minute and other endpoints to 120/minute per IP and endpoint. CORS uses an explicit allowlist; production refuses `*`. Responses include security headers and structured errors.
 
 Event payloads contain IDs, quantities, states, categories, timing values, and reason codes; they exclude names, emails, and coordinates. Browser data reads use the authenticated API. Supabase RLS exposes only events to the anonymous browser role.
