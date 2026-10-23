@@ -1,0 +1,11 @@
+LOAD_MIN = 3                 # minutes to load cargo at donor
+ROAD_FACTOR = 1.3            # haversine -> road distance
+DEFAULT_SPEED_KMPH = 25
+HEARTBEAT_TIMEOUT_S = 90
+CLAIM_TTL_FRACTION = 0.20    # of time-to-deadline
+CLAIM_TTL_MIN_S = 120
+CLAIM_TTL_MAX_S = 300
+SWEEP_THROTTLE_S = 1
+ENGINE_LOCK_KEY = 727001
+ACTIVE = ("CLAIMED", "PICKED_UP", "IN_TRANSIT", "STRANDED")
+IN_FLIGHT = ("PICKED_UP", "IN_TRANSIT", "STRANDED")
