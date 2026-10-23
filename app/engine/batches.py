@@ -11,7 +11,7 @@ def best_case_eta(db, batch, now):
     shelters = db.scalars(select(Shelter).where(Shelter.status == "OPEN").order_by(Shelter.id)).all()
     arrivals = [eta_for(now, r, batch, s).arrival for r in riders for s in shelters
                 if not rules.missing(batch.category, batch.cold_chain, s)]
-    return round((min(arrivals) - now).total_seconds() / 60, 2) if arrivals else None
+    return (min(arrivals) - now).total_seconds() / 60 if arrivals else None
 
 def create_batch(db, now, donor, body, actor) -> tuple[Batch, PlanResult | None]:
     b = Batch(donor_id=donor.id, category=body.category, item_name=body.item_name,

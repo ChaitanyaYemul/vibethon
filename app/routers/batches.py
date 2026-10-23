@@ -10,6 +10,8 @@ from app.errors import ApiError
 from app.schemas import BatchCreate
 from app.engine.batches import create_batch, best_case_eta
 from app.engine.planner import plan_batch
+from app.engine.feasibility import batch_deadline
+from app.engine.events import emit
 from app.serializers import batch_detail
 
 router = APIRouter(prefix="/batches")
@@ -92,5 +94,15 @@ def dispatch(ident: int, user=Depends(allowed), db=Depends(write_db), key: str |
     now = clock.now(db)
     if b.status == "INFEASIBLE":
         b.status = "AVAILABLE"
+    dry = plan_batch(db, b.id, now, commit=False)
+    best = best_case_eta(db, b, now)
+    if best is not None and best > (batch_deadline(b) - now).total_seconds() / 60:
+        dry.reasons = ["TIME_INFEASIBLE"]
+        dry.slices = []
+    if b.quantity_unassigned and not dry.slices and set(dry.reasons) & {"TIME_INFEASIBLE", "INCOMPATIBLE"}:
+        b.status, b.unfulfilled_reason = "INFEASIBLE", ",".join(dry.reasons)
+        emit(db, now, str(user.id), "batch", b.id, "BATCH_INFEASIBLE", {"reasons": dry.reasons})
+        db.flush()
+        return finish(db, key, user, 422, {"code": "INFEASIBLE", "message": "No safe delivery is feasible", "batch_id": b.id, "reasons": dry.reasons, "best_case_eta_min": best, "batch": batch_detail(db, b, now)})
     result = plan_batch(db, b.id, now, commit=True)
     return finish(db, key, user, 200, {**asdict(result), "batch": batch_detail(db, b, now)})

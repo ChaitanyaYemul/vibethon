@@ -105,4 +105,5 @@ def plan_batch(db, batch_id, now, commit: bool, extra_exclude=()) -> PlanResult:
         if remaining > 0 and slices:
             emit(db, now, "system", "batch", batch.id, "PLAN_PARTIAL",
                  {"unfulfilled": remaining, "reasons": reasons})
+        db.flush()
     return PlanResult(slices, remaining, reasons)

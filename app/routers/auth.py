@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from app import clock
 from app.db import get_db
-from app.deps import PROFILES, current_user, entity_id
+from app.deps import PROFILES, current_user, entity_id, read_db, require_role
 from app.engine.mutex import engine_lock
 from app.errors import ApiError
 from app.models import User
@@ -48,5 +48,5 @@ def login(request: Request, body: Login, db=Depends(get_db)):
 
 
 @router.get("/me")
-def me(user=Depends(current_user), db=Depends(get_db)):
-    return {"user_id": str(user.id), "role": user.role, "entity_id": entity_id(db, user)}
+def me(user=Depends(require_role("donor", "rider", "shelter", "admin")), db=Depends(read_db)):
+    return {"user_id": str(user.id), "role": user.role, "entity_id": entity_id(db, user), "now": clock.now(db)}

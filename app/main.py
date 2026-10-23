@@ -15,7 +15,7 @@ from app.routers import auth, batches, assignments, riders, internal, shelters, 
 
 
 def create_app():
-    app = FastAPI(title="Last-Mile Spoilage Trap")
+    app = FastAPI(title="Last-Mile Spoilage Trap", docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url=None)
     app.state.limiter = limiter
     app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(CORSMiddleware, allow_origins=settings.origins,
@@ -35,7 +35,7 @@ def create_app():
         return JSONResponse(status_code=422, content={"code": "VALIDATION_ERROR", "message": "Invalid request fields"})
 
     @app.exception_handler(RateLimitExceeded)
-    async def rate_error(request, exc):
+    def rate_error(request, exc):
         return JSONResponse(status_code=429, content={"code": "RATE_LIMITED", "message": "Too many requests"})
 
     @app.exception_handler(Exception)
@@ -54,6 +54,11 @@ def create_app():
     if settings.demo_mode:
         from app.routers import demo
         app.include_router(demo.router, prefix="/api")
+
+    @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], include_in_schema=False)
+    def missing_api(path: str):
+        raise ApiError(404, "NOT_FOUND", "API route not found")
+
     app.mount("/", StaticFiles(directory=Path(__file__).resolve().parents[1] / "public", html=True), name="ui")
     return app
 

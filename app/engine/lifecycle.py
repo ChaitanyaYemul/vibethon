@@ -45,6 +45,9 @@ def transition(db, a, to, now, actor, reason=None):
         "STRANDED": "STRANDED", "LOST": "SPOILED" if reason == "SPOILED" else "RIDER_SILENT",
     }[to], {"from": frm, "batch_id": a.batch_id, "rider_id": a.rider_id,
             "shelter_id": old_shelter, "quantity": a.quantity, "reason": reason})
+    # Sessions disable autoflush. Subsequent sweep queries must observe both
+    # the recomputed batch status and this transition's audit event.
+    db.flush()
 
 def _demand(db, shelter_id, category):
     return db.execute(select(ShelterDemand).where(

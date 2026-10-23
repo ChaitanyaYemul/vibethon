@@ -34,8 +34,12 @@ def run_sweep(db, now) -> dict:
                 transition(db, a, "CLAIM_EXPIRED", now, "system", "RIDER_SILENT")
             else:                            # cargo physically with the silent rider
                 orig = db.get(Batch, a.batch_id)
-                transition(db, a, "LOST", now, "system", "RIDER_SILENT")
-                create_recovery_batch(db, now, orig, a, r)
+                if now > a.deliver_by:
+                    transition(db, a, "LOST", now, "system", "SPOILED")
+                    stats["spoiled"] += 1
+                else:
+                    transition(db, a, "LOST", now, "system", "RIDER_SILENT")
+                    create_recovery_batch(db, now, orig, a, r)
         stats["riders_silent"] += 1
 
     # 3. Spoilage: in-flight past deliver_by is never deliverable

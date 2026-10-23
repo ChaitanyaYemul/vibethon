@@ -35,6 +35,8 @@ def destination_valid(db, a, now, pickup=False):
 def pickup_cargo(db, a, now, actor):
     if a.status == "CLAIM_EXPIRED":
         raise ApiError(409, "CLAIM_EXPIRED", "Claim expired")
+    if a.status == "CANCELLED" and a.reason == "NO_VALID_DESTINATION":
+        raise ApiError(409, "NO_VALID_DESTINATION", "No safe destination remains")
     if a.status != "CLAIMED":
         raise ApiError(409, "INVALID_TRANSITION", "Pickup requires a claimed assignment")
     if now > a.claim_expires_at:
@@ -69,6 +71,8 @@ def pickup(ident: int, user=Depends(allowed), db=Depends(write_db)):
 def depart(ident: int, user=Depends(allowed), db=Depends(write_db)):
     a = owned_assignment(db, ident, user)
     now = clock.now(db)
+    if a.status != "PICKED_UP":
+        raise ApiError(409, "INVALID_TRANSITION", "Departure requires picked-up cargo")
     transition(db, a, "IN_TRANSIT", now, str(user.id))
     db.commit()
     return assignment_detail(db, a, now)
