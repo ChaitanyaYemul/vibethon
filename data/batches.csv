@@ -1,0 +1,5 @@
+scenario,donor_name,category,item_name,cold_chain,quantity_total,ready_in_min,expires_in_min
+main,Banquet Hall,COOKED_FOOD,Veg Biryani,false,180,0,75
+tight,Far Pharmacy,MEDICAL,Insulin Kits,true,25,0,12
+compat,Hostel Mess,RAW_RATION,Ration Kits,false,60,0,120
+compat,Medico Pharmacy,INFANT_FORMULA,Infant Formula,false,30,0,90

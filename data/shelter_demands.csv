@@ -1,0 +1,11 @@
+shelter_name,category,required
+Shelter A,COOKED_FOOD,50
+Shelter A,RAW_RATION,40
+Shelter A,INFANT_FORMULA,20
+Shelter B,COOKED_FOOD,60
+Shelter B,RAW_RATION,40
+Shelter C,COOKED_FOOD,70
+Shelter C,INFANT_FORMULA,20
+Shelter C,RAW_RATION,30
+Shelter D,COOKED_FOOD,40
+Shelter D,RAW_RATION,30

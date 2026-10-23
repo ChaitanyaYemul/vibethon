@@ -11,7 +11,7 @@ import logging
 from app.config import settings
 from app.errors import ApiError
 from app.security import limiter
-from app.routers import auth, batches, assignments, riders, internal, shelters
+from app.routers import auth, batches, assignments, riders, internal, shelters, events, admin
 
 
 def create_app():
@@ -49,6 +49,11 @@ def create_app():
     app.include_router(riders.router, prefix="/api")
     app.include_router(internal.router, prefix="/api")
     app.include_router(shelters.router, prefix="/api")
+    app.include_router(events.router, prefix="/api")
+    app.include_router(admin.router, prefix="/api")
+    if settings.demo_mode:
+        from app.routers import demo
+        app.include_router(demo.router, prefix="/api")
     app.mount("/", StaticFiles(directory=Path(__file__).resolve().parents[1] / "public", html=True), name="ui")
     return app
 

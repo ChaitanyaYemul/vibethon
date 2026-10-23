@@ -1,0 +1,5 @@
+name,lat,lng,status,has_clean_water,has_cooking_fuel,has_refrigeration
+Shelter A,18.5290,73.8740,OPEN,true,true,false
+Shelter B,18.5080,73.8450,OPEN,true,true,true
+Shelter C,18.5400,73.8350,OPEN,true,false,false
+Shelter D,18.4900,73.8600,OPEN,false,true,false
