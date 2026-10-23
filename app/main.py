@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -59,7 +60,9 @@ def create_app():
     def missing_api(path: str):
         raise ApiError(404, "NOT_FOUND", "API route not found")
 
-    app.mount("/", StaticFiles(directory=Path(__file__).resolve().parents[1] / "public", html=True), name="ui")
+    # Vercel serves public/ from its CDN and may omit it from the function bundle.
+    if not os.environ.get("VERCEL"):
+        app.mount("/", StaticFiles(directory=Path(__file__).resolve().parents[1] / "public", html=True), name="ui")
     return app
 
 
